@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIFA 24 Leaderboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      font-size: large;
+      background-image: url('./https___prod.static9.jpg'); /* Replace 'your-image-path.jpg' with the path to your image */
+      color: rgb(255, 255, 255);
+      text-align: center;
+      padding: 30px;
+      background-size:cover;
+      background-position: 0px 230px;
+      
+    }
+
+    .cover-image{
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      background-image: url('./https___prod.static9.jpg'); /* Replace 'your-image-path.jpg' with the path to your image */
+
+      opacity: 0.5; /* Set the opacity as needed */
+      z-index: 0;
+    }
+
+
+    #leaderboard {
+      max-width: 600px;
+      margin: 20px auto;
+      
+      
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #333;
+      color: white;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 20px auto;
+    }
+
+    input, button {
+      padding: 10px;
+      margin-bottom: 10px;
+      display: block;
+      width: 100%;
+    }
+
+    button {
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  
+    #selectPlayer{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 15px;
+      margin: 15px auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="overlay"></div>
+
+  <header>
+    <h1>FIFA 24 Leaderboard</h1>
+    <img class="cover-img" src="" alt="">
+  </header>
+
+  <div id="leaderboard">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Wins</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboardBody">
+        <!-- Leaderboard content will be dynamically added here -->
+      </tbody>
+    </table>
+  </div>
+
+  <form id="addPlayerForm" onsubmit="event.preventDefault(); addPlayer();">
+    <input type="text" id="playerName" placeholder="Enter player name" required>
+    <button type="button" onclick="addPlayer()">Add Player</button>
+  </form>
+
+  <form id="addWinForm" onsubmit="event.preventDefault(); addWin();">
+    <select id="selectPlayer" required>
+      <!-- Player options will be dynamically added here -->
+    </select>
+    <button type="button" onclick="addWin()">Add Win</button>
+  </form>
+
+  <script>
+    // Load players from local storage or use default if not present
+    let players = JSON.parse(localStorage.getItem('players')) || [
+      { id: 1, name: "Player 1", wins: 5 },
+      { id: 2, name: "Player 2", wins: 3 },
+      // Add more players as needed
+    ];
+
+    // Display initial leaderboard and player options
+    displayLeaderboard();
+    displayPlayerOptions();
+
+    function savePlayersToLocalStorage() {
+      localStorage.setItem('players', JSON.stringify(players));
+    }
+
+    function displayLeaderboard() {
+      const leaderboardBody = document.getElementById("leaderboardBody");
+      leaderboardBody.innerHTML = "";
+
+      players.sort((a, b) => b.wins - a.wins); // Sort players by wins
+
+      players.forEach(player => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${player.name}</td><td>${player.wins}</td><td><button class="delete-btn" onclick="deletePlayer(${player.id})">Delete</button></td>`;
+        leaderboardBody.appendChild(row);
+      });
+    }
+
+    function displayPlayerOptions() {
+      const selectPlayer = document.getElementById("selectPlayer");
+      selectPlayer.innerHTML = "";
+
+      players.forEach(player => {
+        const option = document.createElement("option");
+        option.value = player.id;
+        option.text = player.name;
+        selectPlayer.appendChild(option);
+      });
+    }
+
+    function addPlayer() {
+      const playerNameInput = document.getElementById("playerName");
+      const playerName = playerNameInput.value.trim();
+
+      if (playerName === "") {
+        alert("Please enter a valid player name.");
+        return;
+      }
+
+      const playerId = players.length + 1;
+      players.push({ id: playerId, name: playerName, wins: 0 });
+
+      displayLeaderboard();
+      displayPlayerOptions();
+      savePlayersToLocalStorage();
+      playerNameInput.value = "";
+    }
+
+    function addWin() {
+      const selectPlayer = document.getElementById("selectPlayer");
+      const selectedPlayerId = parseInt(selectPlayer.value, 10);
+
+      const selectedPlayer = players.find(player => player.id === selectedPlayerId);
+      if (selectedPlayer) {
+        selectedPlayer.wins++;
+        displayLeaderboard();
+        savePlayersToLocalStorage();
+      }
+    }
+
+    function deletePlayer(playerId) {
+      players = players.filter(player => player.id !== playerId);
+      displayLeaderboard();
+      displayPlayerOptions();
+      savePlayersToLocalStorage();
+    }
+  </script>
+
+</body>
+</html>
